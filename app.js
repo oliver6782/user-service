@@ -1,28 +1,37 @@
 
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+// import rateLimit from 'express-rate-limit';
 import cors from 'cors';
-import { body, validationResult } from 'express-validator';
-import passport from 'passport';
-import csrf from 'csurf';
-import session from 'express-session';
+// import { body, validationResult } from 'express-validator';
+// import passport from 'passport';
+// import csrf from 'csurf';
+// import session from 'express-session';
 import createError from 'http-errors';
 import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
-import logger from 'morgan';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import morgan from "morgan";
 
 import usersRouter from './routes/users.js';
 import securityFilter from './config/security.js';
-import morgan from "morgan";
+
 
 // Get the __dirname equivalent in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Use the security filter for all routes before defining them
+app.use(securityFilter);
+
+// Now define the routes
+app.use('/users', usersRouter);
 
 // View engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -39,9 +48,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/users', usersRouter);
-app.use(securityFilter);
 
 // Catch 404 and forward to error handler
 app.use(function(req, res, next) {
