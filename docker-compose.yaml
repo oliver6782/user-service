@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    ports:
+      - "27017:27017"
+    networks:
+      - user-service-network
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: mongoadmin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: secret
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    ports:
+      - "8081:8081"
+    networks:
+      - user-service-network
+
+  app:
+    build: .
+    container_name: user-service-network
+    environment:
+      MONGO_URL: mongodb://mongoadmin:secret@mongodb:27017/mongodb
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    networks:
+      - user-service-network
+
+networks:
+  user-service-network:
+    driver: bridge
